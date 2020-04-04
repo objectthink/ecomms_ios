@@ -16,6 +16,7 @@ namespace ecomms_ios
         public String name { get; set; }
         public String temperature { get; set; }
         public String description { get; set; }
+        public String location { get; set; }
 
         public SensorData()
         {
@@ -57,6 +58,16 @@ namespace ecomms_ios
             }
         }
 
+        public class SensorDelegate : UITableViewDelegate
+        {
+            public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
+            {
+                //base.RowSelected(tableView, indexPath);
+
+                Console.WriteLine("ROW SELECTED {0}", indexPath.Row);
+            }
+        }
+
         public SensorListViewController() : base("SensorListViewController", null)
         {
         }
@@ -71,6 +82,7 @@ namespace ecomms_ios
             // Perform any additional setup after loading the view, typically from a nib.
 
             TableView.Source = new SensorSource(_sensorNames, _sensorDictionary);
+            TableView.Delegate = new SensorDelegate();
 
             Manager manager = new Manager();
 
@@ -102,10 +114,38 @@ namespace ecomms_ios
                                 _sensorDataList.Add(new SensorData());
                                 _sensorDictionary.Add(client.name, new SensorData());
 
-                                //listen for run state changes
-                                client.addObserver(new ObserverAdapterEx((anobject, ahint, data) =>
+                                //get the location
+                                client.doGet("location", (response) =>
                                 {
-                                    Console.WriteLine((ahint as string));
+                                    _sensorDictionary[client.name].location = response;
+                                });
+
+                                //listen for run state changes
+                                client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
+                                {
+                                    Console.WriteLine((hint as string));
+                                }));
+
+                                client.addObserver(new ObserverAdapter((observable, hint) =>
+                                {
+                                    String notification = hint as String;
+
+                                    Console.WriteLine((hint as string));
+
+                                    if(hint.Equals("ONLINE_CHANGED"))
+                                    {
+                                        IClient me = observable as IClient;
+
+                                        if(!me.online)
+                                        {
+                                            _sensorNames.Remove(me.name);
+
+                                            MainThread.BeginInvokeOnMainThread(() =>
+                                            {
+                                                TableView.ReloadData();
+                                            });
+                                        }
+                                    }
                                 }));
 
                                 //add a status listener
@@ -131,6 +171,32 @@ namespace ecomms_ios
 
             }));
 
+        }
+
+        int _rowSelected = 0;
+        public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
+        {
+            base.RowSelected(tableView, indexPath);
+
+            _rowSelected = indexPath.Row;
+        }
+
+        public override void PrepareForSegue(UIStoryboardSegue segue, NSObject sender)
+        {
+            base.PrepareForSegue(segue, sender);
+
+            var sensorController =
+            segue.DestinationViewController as SensorViewController;
+
+            if (sensorController != null)
+            {
+                Console.WriteLine("about to segue");
+
+                //set selected sensor in controller
+                NSIndexPath indexPath = TableView.IndexPathForSelectedRow;
+                var sensorName = _sensorNames[indexPath.Row];
+                sensorController.sensor = _sensorDictionary[sensorName];
+            }
         }
 
         public override void DidReceiveMemoryWarning()

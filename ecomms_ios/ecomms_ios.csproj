@@ -124,6 +124,7 @@
         <InterfaceDefinition Include="LaunchScreen.storyboard" />
         <InterfaceDefinition Include="Main.storyboard" />
         <InterfaceDefinition Include="SensorListViewController.xib" />
+        <InterfaceDefinition Include="SensorViewController.xib" />
     </ItemGroup>
     <ItemGroup>
         <None Include="Info.plist" />
@@ -140,6 +141,10 @@
         <Compile Include="SensorListViewController.cs" />
         <Compile Include="SensorListViewController.designer.cs">
           <DependentUpon>SensorListViewController.cs</DependentUpon>
+        </Compile>
+        <Compile Include="SensorViewController.cs" />
+        <Compile Include="SensorViewController.designer.cs">
+          <DependentUpon>SensorViewController.cs</DependentUpon>
         </Compile>
     </ItemGroup>
     <ItemGroup>

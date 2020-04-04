@@ -23,7 +23,7 @@ namespace ecomms_ios
 
             Manager manager = new Manager();
 
-            manager.connect(@"nats://192.168.86.20:4222");
+            manager.connect(@"nats://192.168.86.27:4222");
             manager.init();
 
             //addobserver(observerex) notifies with data which is the added client in this case
@@ -35,7 +35,7 @@ namespace ecomms_ios
                 //WIP...
 
                 var client = c as IClient;
-                Thread.Sleep(1000);
+                Thread.Sleep(3000);
                 switch (h)
                 {
                     case "CONNECTED":
@@ -57,7 +57,9 @@ namespace ecomms_ios
                                 Console.WriteLine("{0}:status listener:{1}:{2}", client.name, name, Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 
                                 _label.BeginInvokeOnMainThread(()=> {
+                                    Console.WriteLine("invoke");
                                     _label.Text = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                                    Console.WriteLine("after invoke");
                                 });                                
                             });
                         }

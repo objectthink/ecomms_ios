@@ -1,5 +1,4 @@
 ﻿using System;
-
 using UIKit;
 
 namespace ecomms_ios
@@ -22,6 +21,13 @@ namespace ecomms_ios
             // Perform any additional setup after loading the view, typically from a nib.
 
             Title = sensor.name;
+            _name.Text = sensor.name;
+            _location.Text = sensor.location;
+
+            //json
+            
+            //parse description json...
+            _temperature.Text = "coming!";
         }
 
         public override void DidReceiveMemoryWarning()

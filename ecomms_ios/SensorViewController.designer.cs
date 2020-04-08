@@ -14,6 +14,10 @@ namespace ecomms_ios
     partial class SensorViewController
     {
         [Outlet]
+        UIKit.UITextField _humidity { get; set; }
+
+
+        [Outlet]
         UIKit.UITextField _location { get; set; }
 
 

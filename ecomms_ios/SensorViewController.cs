@@ -43,6 +43,7 @@ namespace ecomms_ios
 
             //parse description json...
             _temperature.Text = sdp.temperature.ToString();
+            _humidity.Text = sdp.humidity.ToString();
         }
 
         public override void DidReceiveMemoryWarning()

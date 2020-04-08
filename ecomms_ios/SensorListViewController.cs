@@ -29,6 +29,11 @@ namespace ecomms_ios
         List<SensorData> _sensorDataList = new List<SensorData>();
         Dictionary<string, SensorData> _sensorDictionary = new Dictionary<string, SensorData>();
 
+        UIRefreshControl _refreshControl = new UIRefreshControl();
+
+        //ECOMMS Manager
+        Manager _manager;
+
         public class SensorSource : UITableViewSource
         {
             List<string> _sensorNames = new List<string>();
@@ -76,6 +81,73 @@ namespace ecomms_ios
         {
         }
 
+        private void addSensor(IClient client)
+        {
+            if (client.role == Role.Sensor)
+            {
+
+                Console.WriteLine(client.name + " SENSOR ADDED");
+
+                if (!_sensorNames.Contains(client.name))
+                {
+                    _sensorNames.Add(client.name);
+                    _sensorDataList.Add(new SensorData());
+                    _sensorDictionary.Add(client.name, new SensorData());
+
+                    //get the location
+                    client.doGet("location", (response) =>
+                    {
+                        _sensorDictionary[client.name].location = response;
+                    });
+
+                    //listen for run state changes
+                    client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
+                    {
+                        Console.WriteLine((hint as string));
+                    }));
+
+                    client.addObserver(new ObserverAdapter((observable, hint) =>
+                    {
+                        String notification = hint as String;
+
+                        Console.WriteLine((hint as string));
+
+                        if (hint.Equals("ONLINE_CHANGED"))
+                        {
+                            IClient me = observable as IClient;
+
+                            if (!me.online)
+                            {
+                                _sensorNames.Remove(me.name);
+
+                                MainThread.BeginInvokeOnMainThread(() =>
+                                {
+                                    TableView.ReloadData();
+                                });
+                            }
+                        }
+                    }));
+
+                    //add a status listener
+                    client.addStatusListener((name, bytes) =>
+                    {
+                        Console.WriteLine("{0}:status listener:{1}:{2}",
+                            client.name,
+                            name,
+                            Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+
+                        _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                        _sensorDictionary[client.name].name = client.name;
+
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            TableView.ReloadData();
+                        });
+                    });
+                }
+            }
+        }
+
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
@@ -84,13 +156,35 @@ namespace ecomms_ios
             TableView.Source = new SensorSource(_sensorNames, _sensorDictionary);
             TableView.Delegate = new SensorDelegate();
 
-            Manager manager = new Manager();
+            //SETUP PULL TO REFRESH
+            //USE TO REFRESH THE LIST OF SENSORS
+            _refreshControl.ValueChanged += (sender, args) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _refreshControl.EndRefreshing();
+                    _sensorDictionary.Clear();
+                    _sensorDataList.Clear();
+                    _sensorNames.Clear();
 
-            manager.connect(@"nats://192.168.86.27:4222");
-            manager.init();
+                    foreach (IClient client in _manager.clients)
+                        addSensor(client);
+
+                    TableView.ReloadData();
+                });
+            };
+
+            TableView.AddSubview(_refreshControl);
+            ////////////////////////
+
+            //SETUP ECOMMS MANAGER AND START LISTENING TO CLIENT LIST CHANGES
+            _manager = new Manager();
+
+            _manager.connect(@"nats://192.168.86.27:4222");
+            _manager.init();
 
             //addobserver(observerex) notifies with data which is the added client in this case
-            manager.addObserver(new ObserverAdapterEx((o, h, c) =>
+            _manager.addObserver(new ObserverAdapterEx((o, h, c) =>
             {
                 //need to wait to notify until after base class has gotton response
                 //to role request

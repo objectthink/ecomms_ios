@@ -17,6 +17,7 @@ namespace ecomms_ios
         public String temperature { get; set; }
         public String description { get; set; }
         public String location { get; set; }
+        public IClient client { get; set; }
 
         public SensorData()
         {
@@ -81,6 +82,7 @@ namespace ecomms_ios
         {
         }
 
+        //add a sensor to our list of sensors
         private void addSensor(IClient client)
         {
             if (client.role == Role.Sensor)
@@ -93,6 +95,8 @@ namespace ecomms_ios
                     _sensorNames.Add(client.name);
                     _sensorDataList.Add(new SensorData());
                     _sensorDictionary.Add(client.name, new SensorData());
+
+                    _sensorDictionary[client.name].client = client;
 
                     //get the location
                     client.doGet("location", (response) =>
@@ -202,63 +206,7 @@ namespace ecomms_ios
 
                             Console.WriteLine(client.name + " SENSOR CONNECTED");
 
-                            if(!_sensorNames.Contains(client.name))
-                            {
-                                _sensorNames.Add(client.name);
-                                _sensorDataList.Add(new SensorData());
-                                _sensorDictionary.Add(client.name, new SensorData());
-
-                                //get the location
-                                client.doGet("location", (response) =>
-                                {
-                                    _sensorDictionary[client.name].location = response;
-                                });
-
-                                //listen for run state changes
-                                client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
-                                {
-                                    Console.WriteLine((hint as string));
-                                }));
-
-                                client.addObserver(new ObserverAdapter((observable, hint) =>
-                                {
-                                    String notification = hint as String;
-
-                                    Console.WriteLine((hint as string));
-
-                                    if(hint.Equals("ONLINE_CHANGED"))
-                                    {
-                                        IClient me = observable as IClient;
-
-                                        if(!me.online)
-                                        {
-                                            _sensorNames.Remove(me.name);
-
-                                            MainThread.BeginInvokeOnMainThread(() =>
-                                            {
-                                                TableView.ReloadData();
-                                            });
-                                        }
-                                    }
-                                }));
-
-                                //add a status listener
-                                client.addStatusListener((name, bytes) =>
-                                {
-                                    Console.WriteLine("{0}:status listener:{1}:{2}",
-                                        client.name,
-                                        name,
-                                        Encoding.UTF8.GetString(bytes, 0, bytes.Length));
-
-                                    _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                                    _sensorDictionary[client.name].name = client.name;
-
-                                    MainThread.BeginInvokeOnMainThread(() =>
-                                    {
-                                        TableView.ReloadData();
-                                    });
-                                });
-                            }
+                            addSensor(client);
                         }
                         break;
                 }

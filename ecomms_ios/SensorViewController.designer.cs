@@ -28,8 +28,20 @@ namespace ecomms_ios
         [Outlet]
         UIKit.UITextField _temperature { get; set; }
 
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton setNameButton { get; set; }
+
+        [Action ("SetNameButton_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void SetNameButton_TouchUpInside (UIKit.UIButton sender);
+
         void ReleaseDesignerOutlets ()
         {
+            if (setNameButton != null) {
+                setNameButton.Dispose ();
+                setNameButton = null;
+            }
         }
     }
 }

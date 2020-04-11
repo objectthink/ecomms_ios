@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using ECOMMS_Client;
 using UIKit;
 
 namespace ecomms_ios
@@ -50,6 +51,13 @@ namespace ecomms_ios
         {
             base.DidReceiveMemoryWarning();
             // Release any cached data, images, etc that aren't in use.
+        }
+
+        partial void SetNameButton_TouchUpInside(UIButton sender)
+        {
+            sensor.client.doSet("name", "nametest", (response) => {
+                Console.WriteLine(response);
+            });
         }
     }
 }

@@ -30,7 +30,15 @@ namespace ecomms_ios
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton setLocationButton { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UIButton setNameButton { get; set; }
+
+        [Action ("SetLocationButton_TouchUpInside:")]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        partial void SetLocationButton_TouchUpInside (UIKit.UIButton sender);
 
         [Action ("SetNameButton_TouchUpInside:")]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -38,6 +46,11 @@ namespace ecomms_ios
 
         void ReleaseDesignerOutlets ()
         {
+            if (setLocationButton != null) {
+                setLocationButton.Dispose ();
+                setLocationButton = null;
+            }
+
             if (setNameButton != null) {
                 setNameButton.Dispose ();
                 setNameButton = null;

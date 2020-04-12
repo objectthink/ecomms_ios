@@ -55,7 +55,14 @@ namespace ecomms_ios
 
         partial void SetNameButton_TouchUpInside(UIButton sender)
         {
-            sensor.client.doSet("name", "nametest", (response) => {
+            sensor.client.doSet("name", _name.Text, (response) => {
+                Console.WriteLine(response);
+            });
+        }
+
+        partial void SetLocationButton_TouchUpInside(UIButton sender)
+        {
+            sensor.client.doSet("location", _location.Text, (response) => {
                 Console.WriteLine(response);
             });
         }

@@ -184,7 +184,8 @@ namespace ecomms_ios
             //SETUP ECOMMS MANAGER AND START LISTENING TO CLIENT LIST CHANGES
             _manager = new Manager();
 
-            _manager.connect(@"nats://192.168.86.27:4222");
+            //consider supporting nats list
+            _manager.connect(@"nats://192.168.86.30:4222"); //.27 rPi, .30 maclinbook
             _manager.init();
 
             //addobserver(observerex) notifies with data which is the added client in this case

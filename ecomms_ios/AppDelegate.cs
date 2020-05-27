@@ -1,5 +1,6 @@
 ﻿using Foundation;
 using UIKit;
+using UserNotifications;
 
 namespace ecomms_ios
 {
@@ -15,6 +16,17 @@ namespace ecomms_ios
         [Export("application:didFinishLaunchingWithOptions:")]
         public bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
+            // Request notification permissions from the user
+            UNUserNotificationCenter.Current.RequestAuthorization(
+                UNAuthorizationOptions.Alert,
+                (approved, err) =>
+                {
+                    // Handle approval
+                });
+
+            // Watch for notifications while the app is active
+            //UNUserNotificationCenter.Current.Delegate = new UserNotificationCenterDelegate();
+
             // Override point for customization after application launch.
             // If not required for your application you can safely delete this method
             return true;

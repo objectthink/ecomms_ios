@@ -7,6 +7,7 @@ using ECOMMS_Entity;
 using ECOMMS_Manager;
 using Foundation;
 using UIKit;
+using UserNotifications;
 using Xamarin.Essentials;
 
 namespace ecomms_ios
@@ -17,6 +18,9 @@ namespace ecomms_ios
         public String temperature { get; set; }
         public String description { get; set; }
         public String location { get; set; }
+        public String high { get; set; }
+        public String low { get; set; }
+
         public IClient client { get; set; }
 
         public SensorData()
@@ -24,7 +28,16 @@ namespace ecomms_ios
         }
     }
 
-    public partial class SensorListViewController : UITableViewController
+    //SensorClient
+    //ecoms sensor client derived
+    public class SensorClient : Client
+    {
+        public SensorClient(string id, Role role, ECOMMS_Entity.Type type) : base(id, role, type)
+        {
+        }
+    }
+
+    public partial class SensorListViewController : UITableViewController, IClientFactory
     {
         List<string> _sensorNames = new List<string>();
         List<SensorData> _sensorDataList = new List<SensorData>();
@@ -34,6 +47,12 @@ namespace ecomms_ios
 
         //ECOMMS Manager
         Manager _manager;
+
+        //enables us to populate the manager with derived clients that we create here
+        public IClient getClientFor(string address, Role role, ECOMMS_Entity.Type type, SubType subType)
+        {
+            return new SensorClient(address, role, type);
+        }
 
         public class SensorSource : UITableViewSource
         {
@@ -104,6 +123,18 @@ namespace ecomms_ios
                         _sensorDictionary[client.name].location = response;
                     });
 
+                    //get the low
+                    client.doGet("low", (response) =>
+                    {
+                        _sensorDictionary[client.name].low = response;
+                    });
+
+                    //get the high
+                    client.doGet("high", (response) =>
+                    {
+                        _sensorDictionary[client.name].high = response;
+                    });
+
                     //listen for run state changes
                     client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
                     {
@@ -127,6 +158,26 @@ namespace ecomms_ios
                                 MainThread.BeginInvokeOnMainThread(() =>
                                 {
                                     TableView.ReloadData();
+                                });
+
+                                ///////////////////////////////////////////////
+                                ///send notification - sensor offline
+                                var content = new UNMutableNotificationContent();
+                                content.Title = "ECOMMS iOS";
+                                content.Subtitle = "Sensor offline!";
+                                content.Body = me.name + " went offline";
+                                content.Badge = 1;
+
+                                var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(1, false);
+
+                                var requestID = "sampleRequest";
+                                var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
+
+                                UNUserNotificationCenter.Current.AddNotificationRequest(request, (err) => {
+                                    if (err != null)
+                                    {
+                                        // Do something with error...
+                                    }
                                 });
                             }
                         }

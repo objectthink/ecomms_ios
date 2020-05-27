@@ -30,6 +30,14 @@ namespace ecomms_ios
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _high { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _low { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UIButton setLocationButton { get; set; }
 
         [Outlet]
@@ -46,6 +54,16 @@ namespace ecomms_ios
 
         void ReleaseDesignerOutlets ()
         {
+            if (_high != null) {
+                _high.Dispose ();
+                _high = null;
+            }
+
+            if (_low != null) {
+                _low.Dispose ();
+                _low = null;
+            }
+
             if (setLocationButton != null) {
                 setLocationButton.Dispose ();
                 setLocationButton = null;

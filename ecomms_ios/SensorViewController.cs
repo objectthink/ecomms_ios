@@ -39,6 +39,8 @@ namespace ecomms_ios
             Title = sensor.name;
             _name.Text = sensor.name;
             _location.Text = sensor.location;
+            _high.Text = sensor.high;
+            _low.Text = sensor.low;
 
             //json
             var options = new JsonSerializerOptions
@@ -116,6 +118,12 @@ namespace ecomms_ios
                     //AS WE HAVE NOT CREATED A DERIVED CLASS YET
                     //UPDATE OUR LOCATION HERE
                     sensor.location = response;
+                });
+                sensor.client.doGet("name", (response) =>
+                {
+                    //AS WE HAVE NOT CREATED A DERIVED CLASS YET
+                    //UPDATE OUR LOCATION HERE
+                    sensor.name = response;
                 });
             }
         }

@@ -35,7 +35,6 @@ namespace ecomms_ios
                 //WIP...
 
                 var client = c as IClient;
-                Thread.Sleep(3000);
                 switch (h)
                 {
                     case "CONNECTED":

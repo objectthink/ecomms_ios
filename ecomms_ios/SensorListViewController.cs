@@ -153,7 +153,9 @@ namespace ecomms_ios
 
                             if (!me.online)
                             {
-                                _sensorNames.Remove(me.name);
+                                _ = _sensorNames.Remove(me.name);
+                                _ = _sensorDataList.Remove(_sensorDictionary[me.name]);
+                                _ = _sensorDictionary.Remove(me.name);
 
                                 MainThread.BeginInvokeOnMainThread(() =>
                                 {
@@ -189,7 +191,8 @@ namespace ecomms_ios
                         Console.WriteLine("{0}:status listener:{1}:{2}",
                             client.name,
                             name,
-                            Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+                            Encoding.UTF8.GetString(bytes, 0, bytes.Length)
+                            );
 
                         _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                         _sensorDictionary[client.name].name = client.name;
@@ -236,7 +239,7 @@ namespace ecomms_ios
             _manager = new Manager();
 
             //consider supporting nats list
-            _manager.connect(@"nats://192.168.86.30:4222"); //.27 rPi, .30 maclinbook
+            _manager.connect(@"nats://192.168.86.31:7222"); //.27 rPi, .30 maclinbook
             _manager.init();
 
             //addobserver(observerex) notifies with data which is the added client in this case
@@ -248,7 +251,6 @@ namespace ecomms_ios
                 //WIP...
 
                 var client = c as IClient;
-                Thread.Sleep(3000);
                 switch (h)
                 {
                     case "CONNECTED":

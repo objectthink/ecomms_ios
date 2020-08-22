@@ -85,11 +85,26 @@ namespace ecomms_ios
 
         public class SensorDelegate : UITableViewDelegate
         {
+            SensorListViewController _controller;
+            public SensorDelegate(SensorListViewController controller) : base()
+            {
+                _controller = controller;
+            }
+
             public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
             {
-                //base.RowSelected(tableView, indexPath);
-
                 Console.WriteLine("ROW SELECTED {0}", indexPath.Row);
+
+                string name = _controller._sensorNames.ToArray()[indexPath.Row];
+                if(_controller._sensorDictionary[name].client.role == Role.Sensor)
+                {
+                    _controller.PerformSegue("sensorSegue", this);
+                }
+
+                if (_controller._sensorDictionary[name].client.role == Role.Instrument)
+                {
+                    _controller.PerformSegue("instrumentSegue", this);
+                }
             }
         }
 
@@ -101,10 +116,15 @@ namespace ecomms_ios
         {
         }
 
+        private void addInstrument(IClient client)
+        {
+            addSensor(client);
+        }
+
         //add a sensor to our list of sensors
         private void addSensor(IClient client)
         {
-            if (client.role == Role.Sensor)
+            if (client.role == Role.Sensor || client.role == Role.Instrument)
             {
 
                 Console.WriteLine(client.name + " SENSOR ADDED");
@@ -212,7 +232,7 @@ namespace ecomms_ios
             // Perform any additional setup after loading the view, typically from a nib.
 
             TableView.Source = new SensorSource(_sensorNames, _sensorDictionary);
-            TableView.Delegate = new SensorDelegate();
+            TableView.Delegate = new SensorDelegate(this);
 
             //SETUP PULL TO REFRESH
             //USE TO REFRESH THE LIST OF SENSORS
@@ -262,6 +282,13 @@ namespace ecomms_ios
 
                             addSensor(client);
                         }
+
+                        if (client.role == Role.Instrument)
+                        {
+                            Console.WriteLine(client.name + " INSTRUMENT CONNECTED");
+
+                            addInstrument(client);
+                        }
                         break;
                 }
 
@@ -275,23 +302,44 @@ namespace ecomms_ios
             base.RowSelected(tableView, indexPath);
 
             _rowSelected = indexPath.Row;
+
+            PerformSegue("sensorSegue", this);
         }
 
         public override void PrepareForSegue(UIStoryboardSegue segue, NSObject sender)
         {
             base.PrepareForSegue(segue, sender);
 
-            var sensorController =
-            segue.DestinationViewController as SensorViewController;
-
-            if (sensorController != null)
+            if(segue.Identifier == "sensorSegue")
             {
-                Console.WriteLine("about to segue");
+                var sensorController =
+                segue.DestinationViewController as SensorViewController;
 
-                //set selected sensor in controller
-                NSIndexPath indexPath = TableView.IndexPathForSelectedRow;
-                var sensorName = _sensorNames[indexPath.Row];
-                sensorController.sensor = _sensorDictionary[sensorName];
+                if (sensorController != null)
+                {
+                    Console.WriteLine("about to segue");
+
+                    //set selected sensor in controller
+                    NSIndexPath indexPath = TableView.IndexPathForSelectedRow;
+                    var sensorName = _sensorNames[indexPath.Row];
+                    sensorController.sensor = _sensorDictionary[sensorName];
+                }
+            }
+
+            if (segue.Identifier == "instrumentSegue")
+            {
+                var controller =
+                segue.DestinationViewController as InstrumentViewController;
+
+                if (controller != null)
+                {
+                    Console.WriteLine("about to segue");
+
+                    //set selected sensor in controller
+                    NSIndexPath indexPath = TableView.IndexPathForSelectedRow;
+                    var sensorName = _sensorNames[indexPath.Row];
+                    controller.sensor = _sensorDictionary[sensorName];
+                }
             }
         }
 

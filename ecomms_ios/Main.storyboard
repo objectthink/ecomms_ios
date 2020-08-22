@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="3236">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="3236">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
@@ -44,7 +44,7 @@
             </objects>
             <point key="canvasLocation" x="-358" y="-433"/>
         </scene>
-        <!--Sensors-->
+        <!--Participants-->
         <scene sceneID="3226">
             <objects>
                 <tableViewController id="3227" customClass="SensorListViewController" sceneMemberID="viewController">
@@ -76,9 +76,6 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <segue destination="4684" kind="show" id="4927"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -86,18 +83,22 @@
                             <outlet property="delegate" destination="3227" id="3231"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Sensors" id="3228"/>
+                    <navigationItem key="navigationItem" title="Participants" id="3228"/>
+                    <connections>
+                        <segue destination="4684" kind="show" identifier="sensorSegue" id="GSd-zu-TuL"/>
+                        <segue destination="ta8-lX-KKI" kind="show" identifier="instrumentSegue" id="BGi-2e-zE5"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3234" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="671" y="-431"/>
+            <point key="canvasLocation" x="970" y="-431"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="3235">
             <objects>
                 <navigationController id="3236" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="3238">
-                        <rect key="frame" x="0.0" y="20" width="414" height="50"/>
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -106,7 +107,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3239" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="170" y="-430"/>
+            <point key="canvasLocation" x="290" y="-433"/>
         </scene>
         <!--Sensor View Controller-->
         <scene sceneID="4683">
@@ -225,6 +226,7 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </view>
+                    <navigationItem key="navigationItem" id="zkI-wW-KUt"/>
                     <connections>
                         <outlet property="_high" destination="6037" id="name-outlet-6037"/>
                         <outlet property="_humidity" destination="iTZ-Wn-FCn" id="etV-yg-9J8"/>
@@ -238,7 +240,54 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4686" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1364" y="-409"/>
+            <point key="canvasLocation" x="1797" y="-522"/>
+        </scene>
+        <!--Instrument View Controller-->
+        <scene sceneID="Ll6-L0-kXT">
+            <objects>
+                <viewController id="ta8-lX-KKI" customClass="InstrumentViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="69V-A3-2L2"/>
+                        <viewControllerLayoutGuide type="bottom" id="gjJ-Yo-Wfe"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Vau-Xo-e8U">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6272">
+                                <rect key="frame" x="20" y="84" width="364" height="158"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6273">
+                                <rect key="frame" x="20" y="262" width="364" height="158"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yxE-dF-iBD">
+                                <rect key="frame" x="20" y="438" width="364" height="388"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="rGr-3n-mqc"/>
+                    <connections>
+                        <outlet property="_location" destination="6273" id="60w-4K-c34"/>
+                        <outlet property="_name" destination="6272" id="0dt-6q-4mE"/>
+                        <outlet property="_status" destination="yxE-dF-iBD" id="hvT-1w-fgB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lgg-bf-ZVi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2037.68115942029" y="-151.33928571428569"/>
         </scene>
     </scenes>
 </document>

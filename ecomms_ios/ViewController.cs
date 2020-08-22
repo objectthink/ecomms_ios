@@ -39,6 +39,11 @@ namespace ecomms_ios
                 {
                     case "CONNECTED":
 
+                        if (client.role == Role.Instrument)
+                        {
+                            Console.WriteLine(client.name + " INSTRUMENT CONNECTED");
+                        }
+
                         if (client.role == Role.Sensor)
                         {
 
@@ -62,6 +67,7 @@ namespace ecomms_ios
                                 });                                
                             });
                         }
+
                         break;
                 }
 

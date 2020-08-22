@@ -1,44 +1,58 @@
 // WARNING
 //
-// This file has been generated automatically by Visual Studio to store outlets and
-// actions made in the UI designer. If it is removed, they will be lost.
-// Manual changes to this file may not be handled correctly.
+// This file has been generated automatically by Visual Studio from the outlets and
+// actions declared in your storyboard file.
+// Manual changes to this file will not be maintained.
 //
 using Foundation;
+using System;
 using System.CodeDom.Compiler;
 
 namespace ecomms_ios
 {
-	[Register ("InstrumentViewController")]
-	partial class InstrumentViewController
-	{
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIKit.UILabel _location { get; set; }
+    [Register ("InstrumentViewController")]
+    partial class InstrumentViewController
+    {
+        [Outlet]
+        UIKit.UILabel _status { get; set; }
 
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIKit.UILabel _name { get; set; }
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _location { get; set; }
 
-		[Outlet]
-		UIKit.UILabel _status { get; set; }
-		
-		void ReleaseDesignerOutlets ()
-		{
-			if (_location != null) {
-				_location.Dispose ();
-				_location = null;
-			}
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _locationLabel { get; set; }
 
-			if (_name != null) {
-				_name.Dispose ();
-				_name = null;
-			}
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _name { get; set; }
 
-			if (_status != null) {
-				_status.Dispose ();
-				_status = null;
-			}
-		}
-	}
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UILabel _nameLabel { get; set; }
+
+        void ReleaseDesignerOutlets ()
+        {
+            if (_location != null) {
+                _location.Dispose ();
+                _location = null;
+            }
+
+            if (_locationLabel != null) {
+                _locationLabel.Dispose ();
+                _locationLabel = null;
+            }
+
+            if (_name != null) {
+                _name.Dispose ();
+                _name = null;
+            }
+
+            if (_nameLabel != null) {
+                _nameLabel.Dispose ();
+                _nameLabel = null;
+            }
+        }
+    }
 }

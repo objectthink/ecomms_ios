@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using ECOMMS_Client;
 using ECOMMS_Entity;
 using ECOMMS_Manager;
@@ -10,6 +12,34 @@ namespace ecomms_ios
 {
     public partial class InstrumentViewController : UIViewController, IObserverEx
     {
+        public class GetResponse
+        {
+            public Dictionary<String, String> TartGet { get; set; }
+
+            public String Key()
+            {
+                String _return = null;
+                foreach (String key in TartGet.Keys)
+                {
+                    _return = key;
+                    break;
+                }
+
+                return _return;
+
+            }
+
+            public String Value()
+            {
+                return TartGet[Key()];
+            }
+
+            public String Value(String which)
+            {
+                return TartGet[which];
+            }
+        }
+
         public SensorData sensor
         {
             get;
@@ -34,8 +64,15 @@ namespace ecomms_ios
             // Perform any additional setup after loading the view, typically from a nib.
 
             Title = "an instrument";
-            _name.Text = sensor.name;
-            _location.Text = sensor.location;
+
+            //parse the json returned for the name and location
+            GetResponse json = JsonSerializer.Deserialize<GetResponse>(sensor.name);
+            _name.Text = json.Value();
+            _nameLabel.Text = json.Key();
+
+            json = JsonSerializer.Deserialize<GetResponse>(sensor.location);
+            _location.Text = json.Value();
+            _locationLabel.Text = json.Key();
 
             //add a bound status listener
             sensor.client.addStatusListener(this, (name, bytes) =>

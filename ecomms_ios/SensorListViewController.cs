@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using ECOMMS_Client;
 using ECOMMS_Entity;
@@ -9,6 +10,7 @@ using Foundation;
 using UIKit;
 using UserNotifications;
 using Xamarin.Essentials;
+using static ecomms_ios.InstrumentViewController;
 
 namespace ecomms_ios
 {
@@ -37,6 +39,23 @@ namespace ecomms_ios
         }
     }
 
+    //SensorClient
+    //ecoms sensor client derived
+    public class AresInstrumentClient : InstrumentClient
+    {
+        public bool nameParsed { get; private set; }
+        public AresInstrumentClient(string id, Role role, ECOMMS_Entity.Type type) : base(id, type)
+        {
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+
+            nameParsed = true;
+        }
+    }
+
     public partial class SensorListViewController : UITableViewController, IClientFactory
     {
         List<string> _sensorNames = new List<string>();
@@ -51,7 +70,17 @@ namespace ecomms_ios
         //enables us to populate the manager with derived clients that we create here
         public IClient getClientFor(string address, Role role, ECOMMS_Entity.Type type, SubType subType)
         {
-            return new SensorClient(address, role, type);
+            IClient client = null;
+            switch(role)
+            {
+                case Role.Instrument:
+                    client = new AresInstrumentClient(address, role, type);
+                    break;
+                case Role.Sensor:
+                    client = new SensorClient(address, role, type);
+                    break;
+            }
+            return client;
         }
 
         public class SensorSource : UITableViewSource
@@ -118,112 +147,215 @@ namespace ecomms_ios
 
         private void addInstrument(IClient client)
         {
-            addSensor(client);
+            Console.WriteLine(client.name + " INSTRUMENT ADDED");
+
+            if (!_sensorNames.Contains(client.name))
+            {
+                //parse name here for now
+
+                if (!(client as AresInstrumentClient).nameParsed )
+                {
+                    GetResponse r = JsonSerializer.Deserialize<GetResponse>(client.name);
+                    (client as AresInstrumentClient).setName(r.Value());
+                }
+
+                _sensorNames.Add(client.name);
+
+                _sensorDataList.Add(new SensorData());
+                _sensorDictionary.Add(client.name, new SensorData());
+
+                _sensorDictionary[client.name].client = client;
+
+                //get the location
+                client.doGet("location", (response) =>
+                {
+                    //parse the json returned for the name and location
+                    GetResponse json = JsonSerializer.Deserialize<GetResponse>(response);
+
+                    _sensorDictionary[client.name].location = json.Value();
+                });
+
+                //listen for run state changes
+                client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
+                {
+                    Console.WriteLine((hint as string));
+                }));
+
+                client.addObserver(new ObserverAdapter((observable, hint) =>
+                {
+                    String notification = hint as String;
+
+                    Console.WriteLine((hint as string));
+
+                    if (hint.Equals("ONLINE_CHANGED"))
+                    {
+                        IClient me = observable as IClient;
+
+                        if (!me.online)
+                        {
+                            //_ = _sensorNames.Remove(me.name);
+                            //_ = _sensorDataList.Remove(_sensorDictionary[me.name]);
+                            //_ = _sensorDictionary.Remove(me.name);
+
+                            //MainThread.BeginInvokeOnMainThread(() =>
+                            //{
+                            //    TableView.ReloadData();
+                            //});
+
+                            ///////////////////////////////////////////////
+                            ///send notification - sensor offline
+                            var content = new UNMutableNotificationContent();
+                            content.Title = "ECOMMS iOS";
+                            content.Subtitle = "Instrument offline!";
+                            content.Body = me.name + " went offline";
+                            content.Badge = 1;
+
+                            var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(1, false);
+
+                            var requestID = "sampleRequest";
+                            var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
+
+                            UNUserNotificationCenter.Current.AddNotificationRequest(request, (err) => {
+                                if (err != null)
+                                {
+                                    // Do something with error...
+                                }
+                            });
+                        }
+                    }
+                }));
+
+                //add a status listener
+                client.addStatusListener((name, bytes) =>
+                {
+                    //LIST FOR INSTRUMENT STATUS STATUS HERE
+                    Console.WriteLine("{0}:status listener:{1}:{2}",
+                        client.name,
+                        name,
+                        Encoding.UTF8.GetString(bytes, 0, bytes.Length)
+                        );
+
+                    //SET DESCRIPTION TO INSTRUMENT RUN STATUS
+                    _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    _sensorDictionary[client.name].name = client.name;
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        TableView.ReloadData();
+                    });
+                });
+            }
+
+            //MainThread.BeginInvokeOnMainThread(() =>
+            //{
+            //    TableView.ReloadData();
+            //});
         }
 
         //add a sensor to our list of sensors
         private void addSensor(IClient client)
         {
-            if (client.role == Role.Sensor || client.role == Role.Instrument)
+            Console.WriteLine(client.name + " SENSOR ADDED");
+
+            if (!_sensorNames.Contains(client.name))
             {
+                _sensorNames.Add(client.name);
+                _sensorDataList.Add(new SensorData());
+                _sensorDictionary.Add(client.name, new SensorData());
 
-                Console.WriteLine(client.name + " SENSOR ADDED");
+                _sensorDictionary[client.name].client = client;
 
-                if (!_sensorNames.Contains(client.name))
+                //get the location
+                client.doGet("location", (response) =>
                 {
-                    _sensorNames.Add(client.name);
-                    _sensorDataList.Add(new SensorData());
-                    _sensorDictionary.Add(client.name, new SensorData());
+                    _sensorDictionary[client.name].location = response;
+                });
 
-                    _sensorDictionary[client.name].client = client;
+                //get the low
+                client.doGet("low", (response) =>
+                {
+                    _sensorDictionary[client.name].low = response;
+                });
 
-                    //get the location
-                    client.doGet("location", (response) =>
+                //get the high
+                client.doGet("high", (response) =>
+                {
+                    _sensorDictionary[client.name].high = response;
+                });
+
+                //listen for run state changes
+                client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
+                {
+                    Console.WriteLine((hint as string));
+                }));
+
+                client.addObserver(new ObserverAdapter((observable, hint) =>
+                {
+                    String notification = hint as String;
+
+                    Console.WriteLine((hint as string));
+
+                    if (hint.Equals("ONLINE_CHANGED"))
                     {
-                        _sensorDictionary[client.name].location = response;
-                    });
+                        IClient me = observable as IClient;
 
-                    //get the low
-                    client.doGet("low", (response) =>
-                    {
-                        _sensorDictionary[client.name].low = response;
-                    });
-
-                    //get the high
-                    client.doGet("high", (response) =>
-                    {
-                        _sensorDictionary[client.name].high = response;
-                    });
-
-                    //listen for run state changes
-                    client.addObserver(new ObserverAdapterEx((anobject, hint, data) =>
-                    {
-                        Console.WriteLine((hint as string));
-                    }));
-
-                    client.addObserver(new ObserverAdapter((observable, hint) =>
-                    {
-                        String notification = hint as String;
-
-                        Console.WriteLine((hint as string));
-
-                        if (hint.Equals("ONLINE_CHANGED"))
+                        if (!me.online)
                         {
-                            IClient me = observable as IClient;
+                            _ = _sensorNames.Remove(me.name);
+                            _ = _sensorDataList.Remove(_sensorDictionary[me.name]);
+                            _ = _sensorDictionary.Remove(me.name);
 
-                            if (!me.online)
+                            MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                _ = _sensorNames.Remove(me.name);
-                                _ = _sensorDataList.Remove(_sensorDictionary[me.name]);
-                                _ = _sensorDictionary.Remove(me.name);
+                                TableView.ReloadData();
+                            });
 
-                                MainThread.BeginInvokeOnMainThread(() =>
+                            ///////////////////////////////////////////////
+                            ///send notification - sensor offline
+                            var content = new UNMutableNotificationContent();
+                            content.Title = "ECOMMS iOS";
+                            content.Subtitle = "Sensor offline!";
+                            content.Body = me.name + " went offline";
+                            content.Badge = 1;
+
+                            var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(1, false);
+
+                            var requestID = "sampleRequest";
+                            var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
+
+                            UNUserNotificationCenter.Current.AddNotificationRequest(request, (err) => {
+                                if (err != null)
                                 {
-                                    TableView.ReloadData();
-                                });
-
-                                ///////////////////////////////////////////////
-                                ///send notification - sensor offline
-                                var content = new UNMutableNotificationContent();
-                                content.Title = "ECOMMS iOS";
-                                content.Subtitle = "Sensor offline!";
-                                content.Body = me.name + " went offline";
-                                content.Badge = 1;
-
-                                var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(1, false);
-
-                                var requestID = "sampleRequest";
-                                var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
-
-                                UNUserNotificationCenter.Current.AddNotificationRequest(request, (err) => {
-                                    if (err != null)
-                                    {
-                                        // Do something with error...
-                                    }
-                                });
-                            }
+                                    // Do something with error...
+                                }
+                            });
                         }
-                    }));
+                    }
+                }));
 
-                    //add a status listener
-                    client.addStatusListener((name, bytes) =>
+                //add a status listener
+                client.addStatusListener((name, bytes) =>
+                {
+                    Console.WriteLine("{0}:status listener:{1}:{2}",
+                        client.name,
+                        name,
+                        Encoding.UTF8.GetString(bytes, 0, bytes.Length)
+                        );
+
+                    _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    _sensorDictionary[client.name].name = client.name;
+
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        Console.WriteLine("{0}:status listener:{1}:{2}",
-                            client.name,
-                            name,
-                            Encoding.UTF8.GetString(bytes, 0, bytes.Length)
-                            );
-
-                        _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                        _sensorDictionary[client.name].name = client.name;
-
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            TableView.ReloadData();
-                        });
+                        TableView.ReloadData();
                     });
-                }
+                });
             }
+
+            //MainThread.BeginInvokeOnMainThread(() =>
+            //{
+            //    TableView.ReloadData();
+            //});
         }
 
         public override void ViewDidLoad()
@@ -245,8 +377,18 @@ namespace ecomms_ios
                     _sensorDataList.Clear();
                     _sensorNames.Clear();
 
-                    foreach (IClient client in _manager.clients)
-                        addSensor(client);
+                    foreach (IClient cc in _manager.clients)
+                    {
+                        switch (cc.role)
+                        {
+                            case Role.Instrument:
+                                addInstrument(cc);
+                                break;
+                            case Role.Sensor:
+                                addSensor(cc);
+                                break;
+                        }
+                    }
 
                     TableView.ReloadData();
                 });
@@ -256,11 +398,46 @@ namespace ecomms_ios
             ////////////////////////
 
             //SETUP ECOMMS MANAGER AND START LISTENING TO CLIENT LIST CHANGES
-            _manager = new Manager();
+            _manager = new Manager(this);
 
             //consider supporting nats list
             _manager.connect(@"nats://192.168.86.31:7222"); //.27 rPi, .30 maclinbook
             _manager.init();
+
+            _manager.addObserver(new ObserverAdapter((o, h) =>
+            {
+                switch (h)
+                {
+                    case "CLIENTS_CHANGED":
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            _sensorDictionary.Clear();
+                            _sensorDataList.Clear();
+                            _sensorNames.Clear();
+
+                            foreach (IClient cc in _manager.clients)
+                            {
+                                switch (cc.role)
+                                {
+                                    case Role.Instrument:
+                                        if (cc.isInitialized)
+                                        {
+                                            addInstrument(cc);
+                                        }
+                                        break;
+                                    case Role.Sensor:
+                                        if (cc.isInitialized)
+                                            addSensor(cc);
+                                        break;
+                                }
+                            }
+
+                            TableView.ReloadData();
+
+                        });
+                        break;
+                }
+            }));
 
             //addobserver(observerex) notifies with data which is the added client in this case
             _manager.addObserver(new ObserverAdapterEx((o, h, c) =>

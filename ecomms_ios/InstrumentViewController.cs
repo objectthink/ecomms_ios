@@ -63,16 +63,13 @@ namespace ecomms_ios
             base.ViewDidLoad();
             // Perform any additional setup after loading the view, typically from a nib.
 
-            Title = "an instrument";
+            Title = sensor.name;
 
-            //parse the json returned for the name and location
-            GetResponse json = JsonSerializer.Deserialize<GetResponse>(sensor.name);
-            _name.Text = json.Value();
-            _nameLabel.Text = json.Key();
+            _name.Text = sensor.name;
+            _nameLabel.Text = "Instrument name";
 
-            json = JsonSerializer.Deserialize<GetResponse>(sensor.location);
-            _location.Text = json.Value();
-            _locationLabel.Text = json.Key();
+            _locationLabel.Text = "Instrument location";
+            _location.Text = sensor.location;
 
             //add a bound status listener
             sensor.client.addStatusListener(this, (name, bytes) =>

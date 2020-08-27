@@ -30,6 +30,26 @@ namespace ecomms_ios
         }
     }
 
+    public class RawStatus
+    {
+        public String StatusType { get; set; }
+    }
+
+    public class SignalObject
+    {
+
+        public String Name { get; set; }
+        public String Units { get; set; }
+        public String Value { get; set; }
+    }
+
+    public class StatusStatus
+    {
+
+        public List<SignalObject> Status { get; set; }
+        public String StatusType { get; set; }
+    }
+
     //SensorClient
     //ecoms sensor client derived
     public class SensorClient : Client
@@ -228,28 +248,54 @@ namespace ecomms_ios
                 //add a status listener
                 client.addStatusListener((name, bytes) =>
                 {
+                    string status = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+
                     //LIST FOR INSTRUMENT STATUS STATUS HERE
                     Console.WriteLine("{0}:status listener:{1}:{2}",
                         client.name,
                         name,
-                        Encoding.UTF8.GetString(bytes, 0, bytes.Length)
+                        status
                         );
 
+                    //which status is this?
+                    RawStatus r = JsonSerializer.Deserialize<RawStatus>(status);
+
+                    bool update = false;
+                    if(r.StatusType.Equals("Status"))
+                    {
+                        StatusStatus ss = JsonSerializer.Deserialize<StatusStatus>(status);
+
+                        foreach(SignalObject signal in ss.Status)
+                        {
+                            switch(signal.Name)
+                            {
+                                case "RunState":
+                                    update = !(_sensorDictionary[client.name].description == signal.Value);
+
+                                    _sensorDictionary[client.name].description = signal.Value;
+                                    break;
+                            }
+                        }                        
+                    }
+
                     //SET DESCRIPTION TO INSTRUMENT RUN STATUS
-                    _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    //_sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    Console.WriteLine(_sensorDictionary[client.name].description);
                     _sensorDictionary[client.name].name = client.name;
 
+                    
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        TableView.ReloadData();
+                        if(update)
+                            TableView.ReloadData();
                     });
                 });
             }
 
-            //MainThread.BeginInvokeOnMainThread(() =>
-            //{
-            //    TableView.ReloadData();
-            //});
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                TableView.ReloadData();
+            });
         }
 
         //add a sensor to our list of sensors
@@ -333,16 +379,21 @@ namespace ecomms_ios
                     }
                 }));
 
+                bool update = false;
                 //add a status listener
                 client.addStatusListener((name, bytes) =>
                 {
+                    string description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+
                     Console.WriteLine("{0}:status listener:{1}:{2}",
                         client.name,
                         name,
                         Encoding.UTF8.GetString(bytes, 0, bytes.Length)
                         );
 
-                    _sensorDictionary[client.name].description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    //update = !(_sensorDictionary[client.name].description.Equals(description));
+
+                    _sensorDictionary[client.name].description = description;
                     _sensorDictionary[client.name].name = client.name;
 
                     MainThread.BeginInvokeOnMainThread(() =>
@@ -352,10 +403,10 @@ namespace ecomms_ios
                 });
             }
 
-            //MainThread.BeginInvokeOnMainThread(() =>
-            //{
-            //    TableView.ReloadData();
-            //});
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                TableView.ReloadData();
+            });
         }
 
         public override void ViewDidLoad()

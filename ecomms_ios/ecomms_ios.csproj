@@ -135,6 +135,8 @@
         <InterfaceDefinition Include="SensorListViewController.xib" />
         <InterfaceDefinition Include="SensorViewController.xib" />
         <InterfaceDefinition Include="InstrumentViewController.xib" />
+        <InterfaceDefinition Include="InstrumentTabViewController.xib" />
+        <InterfaceDefinition Include="InstrumentSignalsTableViewController.xib" />
     </ItemGroup>
     <ItemGroup>
         <None Include="Info.plist" />
@@ -159,6 +161,14 @@
         <Compile Include="InstrumentViewController.cs" />
         <Compile Include="InstrumentViewController.designer.cs">
           <DependentUpon>InstrumentViewController.cs</DependentUpon>
+        </Compile>
+        <Compile Include="InstrumentTabViewController.cs" />
+        <Compile Include="InstrumentTabViewController.designer.cs">
+          <DependentUpon>InstrumentTabViewController.cs</DependentUpon>
+        </Compile>
+        <Compile Include="InstrumentSignalsTableViewController.cs" />
+        <Compile Include="InstrumentSignalsTableViewController.designer.cs">
+          <DependentUpon>InstrumentSignalsTableViewController.cs</DependentUpon>
         </Compile>
     </ItemGroup>
     <ItemGroup>

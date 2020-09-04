@@ -10,7 +10,7 @@ using Xamarin.Essentials;
 
 namespace ecomms_ios
 {
-    public partial class InstrumentViewController : UIViewController, IObserverEx
+    public partial class InstrumentViewController : UIViewController, IDataController, IObserverEx
     {
         public class GetResponse
         {
@@ -62,6 +62,8 @@ namespace ecomms_ios
         {
             base.ViewDidLoad();
             // Perform any additional setup after loading the view, typically from a nib.
+
+            if (sensor == null) return;
 
             Title = sensor.name;
 

@@ -14,6 +14,15 @@ using static ecomms_ios.InstrumentViewController;
 
 namespace ecomms_ios
 {
+    public interface IDataController
+    {
+        SensorData sensor
+        {
+            get;
+            set;
+        }
+    }
+
     public class SensorData
     {
         public String name { get; set; }
@@ -557,7 +566,7 @@ namespace ecomms_ios
             if (segue.Identifier == "instrumentSegue")
             {
                 var controller =
-                segue.DestinationViewController as InstrumentViewController;
+                segue.DestinationViewController as InstrumentTabViewController;
 
                 if (controller != null)
                 {

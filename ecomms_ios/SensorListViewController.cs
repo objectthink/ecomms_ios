@@ -214,7 +214,7 @@ namespace ecomms_ios
                 {
                     String notification = hint as String;
 
-                    Console.WriteLine((hint as string));
+                    //Console.WriteLine((hint as string));
 
                     if (hint.Equals("ONLINE_CHANGED"))
                     {
@@ -260,11 +260,12 @@ namespace ecomms_ios
                     string status = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
 
                     //LIST FOR INSTRUMENT STATUS STATUS HERE
-                    Console.WriteLine("{0}:status listener:{1}:{2}",
-                        client.name,
-                        name,
-                        status
-                        );
+
+                    //Console.WriteLine("{0}:status listener:{1}:{2}",
+                    //    client.name,
+                    //    name,
+                    //    status
+                    //    );
 
                     //which status is this?
                     RawStatus r = JsonSerializer.Deserialize<RawStatus>(status);
@@ -394,11 +395,11 @@ namespace ecomms_ios
                 {
                     string description = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
 
-                    Console.WriteLine("{0}:status listener:{1}:{2}",
-                        client.name,
-                        name,
-                        Encoding.UTF8.GetString(bytes, 0, bytes.Length)
-                        );
+                    //Console.WriteLine("{0}:status listener:{1}:{2}",
+                    //    client.name,
+                    //    name,
+                    //    Encoding.UTF8.GetString(bytes, 0, bytes.Length)
+                    //    );
 
                     //update = !(_sensorDictionary[client.name].description.Equals(description));
 

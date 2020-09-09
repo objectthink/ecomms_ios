@@ -1,6 +1,7 @@
 ﻿using System;
-
+using ECOMMS_Client;
 using UIKit;
+using Xamarin.Essentials;
 
 namespace ecomms_ios
 {
@@ -18,13 +19,36 @@ namespace ecomms_ios
 
         public InstrumentSignalsTableViewController(IntPtr handle) : base(handle)
         {
-
         }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
             // Perform any additional setup after loading the view, typically from a nib.
+
+            Title = "Signals";
+        }
+
+        public override void ViewDidAppear(bool animated)
+        {
+            base.ViewDidAppear(animated);
+
+            IClient client = sensor.client;
+
+            client.addStatusListener("CONTROL_PAGE", (name, bytes) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    TableView.ReloadData();
+                });
+            });
+        }
+
+        public override void ViewDidDisappear(bool animated)
+        {
+            base.ViewDidDisappear(animated);
+
+            sensor.client.removeListener("CONTROL_PAGE");
         }
 
         public override void DidReceiveMemoryWarning()

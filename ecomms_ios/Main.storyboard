@@ -242,7 +242,7 @@
             </objects>
             <point key="canvasLocation" x="1845" y="-734"/>
         </scene>
-        <!--Item-->
+        <!--Instrument-->
         <scene sceneID="Ll6-L0-kXT">
             <objects>
                 <viewController id="ta8-lX-KKI" customClass="InstrumentViewController" sceneMemberID="viewController">
@@ -299,7 +299,7 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Item" id="AKC-73-KKJ"/>
+                    <tabBarItem key="tabBarItem" title="Instrument" id="AKC-73-KKJ"/>
                     <navigationItem key="navigationItem" id="rGr-3n-mqc"/>
                     <connections>
                         <outlet property="_location" destination="6273" id="60w-4K-c34"/>
@@ -311,9 +311,9 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lgg-bf-ZVi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2684" y="-200"/>
+            <point key="canvasLocation" x="2619" y="-277"/>
         </scene>
-        <!--Item-->
+        <!--Signals-->
         <scene sceneID="6iY-1s-3Qj">
             <objects>
                 <tableViewController id="JTg-ZL-PeA" customClass="InstrumentSignalsTableViewController" sceneMemberID="viewController">
@@ -336,16 +336,35 @@
                             <outlet property="delegate" destination="JTg-ZL-PeA" id="8LW-hm-Nhl"/>
                         </connections>
                     </tableView>
-                    <tabBarItem key="tabBarItem" title="Item" id="xfc-k5-ojc"/>
+                    <tabBarItem key="tabBarItem" title="Signals" id="xfc-k5-ojc"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aRs-fE-JwW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3064" y="192"/>
+            <point key="canvasLocation" x="2822" y="-123"/>
         </scene>
-        <!--Instrument Tab View Controller-->
+        <!--Control-->
+        <scene sceneID="FtH-DK-ljD">
+            <objects>
+                <viewController id="K8R-Pq-UZ6" customClass="InstrumentControlViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="iMH-9K-wML"/>
+                        <viewControllerLayoutGuide type="bottom" id="L1n-SI-4Md"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Ifs-RQ-gi7">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Control" id="8Wp-m5-eJC"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="D7L-u1-11r" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3170" y="9"/>
+        </scene>
+        <!--Control-->
         <scene sceneID="XsI-SD-PBU">
             <objects>
-                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="cV6-pJ-Gtv" customClass="InstrumentTabViewController" sceneMemberID="viewController">
+                <tabBarController title="Control" automaticallyAdjustsScrollViewInsets="NO" id="cV6-pJ-Gtv" customClass="InstrumentTabViewController" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="qn8-i2-agF"/>
                     <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="9iu-LS-zeG">
@@ -356,6 +375,7 @@
                     <connections>
                         <segue destination="ta8-lX-KKI" kind="relationship" relationship="viewControllers" id="a1I-az-wc6"/>
                         <segue destination="JTg-ZL-PeA" kind="relationship" relationship="viewControllers" id="QCR-2h-yte"/>
+                        <segue destination="K8R-Pq-UZ6" kind="relationship" relationship="viewControllers" id="ShY-oZ-xKA"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FFU-1b-01O" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

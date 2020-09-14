@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
 using ECOMMS_Client;
+using Foundation;
 using UIKit;
 using Xamarin.Essentials;
 
@@ -11,6 +15,37 @@ namespace ecomms_ios
         {
             get;
             set;
+        }
+
+        public class RealtimeStatus
+        {
+
+            public List<SignalObject> Signals { get; set; }
+            public String StatusType { get; set; }
+        }
+
+        public class SignalSource : UITableViewSource
+        {
+            public SignalSource()
+            {
+            }
+
+            public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
+            {
+                // in a Storyboard, Dequeue will ALWAYS return a cell, 
+                var cell = tableView.DequeueReusableCell("SignalItem");
+
+                // now set the properties as normal
+                cell.DetailTextLabel.Text = "1";
+                cell.TextLabel.Text = "1";
+
+                return cell;
+            }
+
+            public override nint RowsInSection(UITableView tableview, nint section)
+            {
+                return 1;
+            }
         }
 
         public InstrumentSignalsTableViewController() : base("InstrumentSignalsTableViewController", null)
@@ -27,6 +62,9 @@ namespace ecomms_ios
             // Perform any additional setup after loading the view, typically from a nib.
 
             Title = "Signals";
+
+            TableView.Source = new SignalSource();
+            //TableView.Delegate = null;
         }
 
         public override void ViewDidAppear(bool animated)
@@ -37,6 +75,35 @@ namespace ecomms_ios
 
             client.addStatusListener("CONTROL_PAGE", (name, bytes) =>
             {
+                string status = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+
+                //LIST FOR INSTRUMENT STATUS STATUS HERE
+
+                //Console.WriteLine("{0}:status listener:{1}:{2}",
+                //    client.name,
+                //    name,
+                //    status
+                //    );
+
+                //which status is this?
+                RawStatus r = JsonSerializer.Deserialize<RawStatus>(status);
+
+                if (r.StatusType.Equals("RealTime"))
+                {
+                    RealtimeStatus rs = JsonSerializer.Deserialize<RealtimeStatus>(status);
+
+                    foreach (SignalObject signal in rs.Signals)
+                    {
+                        switch (signal.Name)
+                        {
+                            default:
+                                Console.WriteLine(signal.Name);
+                                TableView.ReloadData();
+                                break;
+                        }
+                    }
+                }
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     TableView.ReloadData();

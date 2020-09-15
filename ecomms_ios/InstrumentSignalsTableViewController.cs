@@ -11,6 +11,8 @@ namespace ecomms_ios
 {
     public partial class InstrumentSignalsTableViewController : UITableViewController, IDataController
     {
+        List<SignalObject> _signals = new List<SignalObject>();
+
         public SensorData sensor
         {
             get;
@@ -26,25 +28,29 @@ namespace ecomms_ios
 
         public class SignalSource : UITableViewSource
         {
-            public SignalSource()
+            List<SignalObject> _signals;
+            public SignalSource(List<SignalObject> signals)
             {
+                _signals = signals;
             }
 
             public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
             {
+                SignalObject signal = _signals[indexPath.Row];
+
                 // in a Storyboard, Dequeue will ALWAYS return a cell, 
                 var cell = tableView.DequeueReusableCell("SignalItem");
 
                 // now set the properties as normal
-                cell.DetailTextLabel.Text = "1";
-                cell.TextLabel.Text = "1";
+                cell.TextLabel.Text = signal.Name;
+                cell.DetailTextLabel.Text = signal.Value + " " + signal.Units;
 
                 return cell;
             }
 
             public override nint RowsInSection(UITableView tableview, nint section)
             {
-                return 1;
+                return _signals.Count;
             }
         }
 
@@ -63,7 +69,7 @@ namespace ecomms_ios
 
             Title = "Signals";
 
-            TableView.Source = new SignalSource();
+            TableView.Source = new SignalSource(_signals);
             //TableView.Delegate = null;
         }
 
@@ -94,14 +100,11 @@ namespace ecomms_ios
 
                     foreach (SignalObject signal in rs.Signals)
                     {
-                        switch (signal.Name)
-                        {
-                            default:
-                                Console.WriteLine(signal.Name);
-                                TableView.ReloadData();
-                                break;
-                        }
+                        Console.WriteLine("{0} {1} {2}", signal.Name, signal.Value, signal.Units);
                     }
+
+                    _signals.Clear();
+                    _signals.AddRange(rs.Signals);
                 }
 
                 MainThread.BeginInvokeOnMainThread(() =>

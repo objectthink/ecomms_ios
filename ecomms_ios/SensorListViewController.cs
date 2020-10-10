@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -23,7 +23,7 @@ namespace ecomms_ios
         }
     }
 
-    public class SensorData
+    public partial class SensorData
     {
         public String name { get; set; }
         public String temperature { get; set; }
@@ -419,50 +419,26 @@ namespace ecomms_ios
             });
         }
 
-        public override void ViewDidLoad()
+        string _nats_ip = "";
+        public override void ViewWillAppear(bool animated)
         {
-            base.ViewDidLoad();
-            // Perform any additional setup after loading the view, typically from a nib.
+            base.ViewWillAppear(animated);
+        }
 
-            TableView.Source = new SensorSource(_sensorNames, _sensorDictionary);
-            TableView.Delegate = new SensorDelegate(this);
+        public override void ViewDidAppear(bool animated)
+        {
+            base.ViewDidAppear(animated);
+        }
 
-            //SETUP PULL TO REFRESH
-            //USE TO REFRESH THE LIST OF SENSORS
-            _refreshControl.ValueChanged += (sender, args) =>
-            {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    _refreshControl.EndRefreshing();
-                    _sensorDictionary.Clear();
-                    _sensorDataList.Clear();
-                    _sensorNames.Clear();
-
-                    foreach (IClient cc in _manager.clients)
-                    {
-                        switch (cc.role)
-                        {
-                            case Role.Instrument:
-                                addInstrument(cc);
-                                break;
-                            case Role.Sensor:
-                                addSensor(cc);
-                                break;
-                        }
-                    }
-
-                    TableView.ReloadData();
-                });
-            };
-
-            TableView.AddSubview(_refreshControl);
+        public void natsSetup(string natsConnectionString)
+        {
             ////////////////////////
 
             //SETUP ECOMMS MANAGER AND START LISTENING TO CLIENT LIST CHANGES
             _manager = new Manager(this);
 
             //consider supporting nats list
-            _manager.connect(@"nats://192.168.86.31:7222"); //.27 rPi, .30 maclinbook
+            _manager.connect(natsConnectionString); //.27 rPi, .30 maclinbook
             _manager.init();
 
             _manager.addObserver(new ObserverAdapter((o, h) =>
@@ -531,7 +507,69 @@ namespace ecomms_ios
                 }
 
             }));
+        }
 
+        partial void OnNatsIp(UIKit.UIBarButtonItem sender)
+        {
+            //Create Alert
+            var alert = UIAlertController.Create(
+                "Broker connection",
+                "ex: nats://192.168.86.31:7222",
+                UIAlertControllerStyle.Alert);
+
+            alert.AddTextField((field) => {
+                field.Placeholder = "nats://192.168.86.31:7222";
+            });
+
+            //Add Action
+            alert.AddAction(UIAlertAction.Create("OK", UIAlertActionStyle.Default,
+                (me) =>
+                {
+                    Console.WriteLine(alert.TextFields[0].Text);
+                    natsSetup(@"nats://192.168.86.31:7222");
+                }));
+
+            // Present Alert
+            PresentViewController(alert, true, null);
+        }
+
+        public override void ViewDidLoad()
+        {
+            base.ViewDidLoad();
+            // Perform any additional setup after loading the view, typically from a nib.
+
+            TableView.Source = new SensorSource(_sensorNames, _sensorDictionary);
+            TableView.Delegate = new SensorDelegate(this);
+
+            //SETUP PULL TO REFRESH
+            //USE TO REFRESH THE LIST OF SENSORS
+            _refreshControl.ValueChanged += (sender, args) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _refreshControl.EndRefreshing();
+                    _sensorDictionary.Clear();
+                    _sensorDataList.Clear();
+                    _sensorNames.Clear();
+
+                    foreach (IClient cc in _manager.clients)
+                    {
+                        switch (cc.role)
+                        {
+                            case Role.Instrument:
+                                addInstrument(cc);
+                                break;
+                            case Role.Sensor:
+                                addSensor(cc);
+                                break;
+                        }
+                    }
+
+                    TableView.ReloadData();
+                });
+            };
+
+            TableView.AddSubview(_refreshControl);
         }
 
         int _rowSelected = 0;
